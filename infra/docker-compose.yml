@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: mealfinder
       POSTGRES_PASSWORD: mealfinder
       POSTGRES_DB: mealfinder
-    ports: ["5432:5432"]
+    ports: ["${MF_DB_PORT:-5432}:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mealfinder"]
@@ -31,7 +31,7 @@ services:
   api:
     build: ../backend
     environment: *backend-env
-    ports: ["8000:8000"]
+    ports: ["${MF_API_PORT:-8000}:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }
     healthcheck:
@@ -53,7 +53,7 @@ services:
       context: ../frontend
       args:
         NEXT_PUBLIC_API_URL: http://localhost:8000
-    ports: ["3000:3000"]
+    ports: ["${MF_WEB_PORT:-3000}:3000"]
     depends_on:
       api: { condition: service_healthy }
 

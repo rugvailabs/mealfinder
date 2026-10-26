@@ -46,6 +46,13 @@ async def test_app_errors_become_problem_json() -> None:
     assert body["request_id"] == "req-1"
 
 
+async def test_unknown_routes_become_problem_json() -> None:
+    body = await _problem_for(create_app(), "/api/v1/nope")
+    assert body["_status"] == 404
+    assert body["title"] == "Not found"
+    assert body["request_id"] == "req-1"
+
+
 async def test_unhandled_errors_hide_details() -> None:
     app = create_app()
 

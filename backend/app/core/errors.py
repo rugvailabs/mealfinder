@@ -5,6 +5,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.logging import request_id_var
 
@@ -59,6 +60,16 @@ async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     return _problem(exc.status_code, exc.code, exc.detail)
 
 
+async def _http_error(_: Request, exc: Exception) -> JSONResponse:
+    # Framework-raised errors such as unknown routes (404) and wrong methods (405).
+    assert isinstance(exc, StarletteHTTPException)
+    code = {404: "not_found", 405: "method_not_allowed"}.get(exc.status_code, "http_error")
+    response = _problem(exc.status_code, code, str(exc.detail))
+    if exc.headers:
+        response.headers.update(exc.headers)
+    return response
+
+
 async def _validation_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, RequestValidationError)
     return _problem(422, "validation_error", "Request validation failed", errors=exc.errors())
@@ -71,5 +82,6 @@ async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
 
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(AppError, _app_error)
+    app.add_exception_handler(StarletteHTTPException, _http_error)
     app.add_exception_handler(RequestValidationError, _validation_error)
     app.add_exception_handler(Exception, _unhandled)

@@ -20,4 +20,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("DROP EXTENSION IF EXISTS postgis")
+    # Deliberately a no-op. The postgis/postgis image installs the extension (plus topology and
+    # tiger geocoder, which depend on it) at database creation, so this migration doesn't own it
+    # and dropping it would fail or take unrelated objects with it.
+    pass
