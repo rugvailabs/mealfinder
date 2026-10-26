@@ -25,6 +25,7 @@ jobs:
           npx playwright test
         env:
           E2E_BASE_URL: http://localhost:3000
+          E2E_API_URL: http://localhost:8000
       - if: failure()
         run: docker compose -f infra/docker-compose.yml logs
       - if: always()
