@@ -63,5 +63,8 @@ test("a wrong code shows an error", async ({ page }) => {
   await page.getByRole("button", { name: "Send code" }).click();
   await page.getByLabel("Code").fill("000000");
   await page.getByRole("button", { name: "Verify" }).click();
-  await expect(page.getByRole("alert")).toHaveText("That code is invalid or has expired");
+  // Next.js renders its own (empty) role="alert" route announcer, so match ours by text.
+  await expect(
+    page.getByRole("alert").filter({ hasText: "That code is invalid or has expired" }),
+  ).toBeVisible();
 });
