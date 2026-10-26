@@ -2,10 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 
+from app.core.auth import set_principal_loader
 from app.core.errors import register_error_handlers
 from app.core.logging import RequestIdMiddleware, configure_logging
 from app.core.settings import Settings, get_settings
 from app.modules import ROUTERS
+from app.modules.identity import service as identity_service
+from app.modules.identity.router import dev_router as identity_dev_router
 
 
 def _operation_id(route: APIRoute) -> str:
@@ -34,6 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
+    set_principal_loader(identity_service.load_principal)
 
     @app.get("/healthz", tags=["ops"])
     async def healthz() -> dict[str, str]:
@@ -41,6 +45,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     for router in ROUTERS:
         app.include_router(router, prefix=settings.api_prefix)
+    if settings.is_dev and settings.sms_provider == "console":
+        app.include_router(identity_dev_router, prefix=settings.api_prefix)
 
     return app
 

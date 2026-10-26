@@ -26,3 +26,4 @@ For running each side on its own, see [docs/runbooks/local-development.md](docs/
 - [ADR 0001: Modular monolith](docs/adr/0001-modular-monolith.md)
 - [ADR 0002: Transactional outbox](docs/adr/0002-transactional-outbox.md)
 - [ADR 0003: Cook home address protection](docs/adr/0003-cook-address-protection.md)
+- [ADR 0004: SMS OTP sign-in, sessions and roles](docs/adr/0004-authentication-and-sessions.md)

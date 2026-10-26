@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from app.core.errors import NotFoundError
+from app.core.settings import Settings
 from app.main import create_app
 
 
@@ -44,6 +45,18 @@ async def test_app_errors_become_problem_json() -> None:
     assert body["_status"] == 404
     assert body["detail"] == "no such meal"
     assert body["request_id"] == "req-1"
+
+
+async def test_dev_otp_route_is_absent_outside_local_and_test() -> None:
+    settings = Settings(
+        env="production",
+        jwt_secret="p" * 40,
+        sms_provider="msg91",
+        msg91_auth_key="key",
+        msg91_otp_template_id="tpl",
+    )
+    body = await _problem_for(create_app(settings), "/api/v1/auth/_dev/last-otp?phone=%2B911")
+    assert body["_status"] == 404
 
 
 async def test_unknown_routes_become_problem_json() -> None:

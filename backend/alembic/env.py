@@ -18,6 +18,14 @@ target_metadata = Base.metadata
 database_url = config.get_main_option("sqlalchemy.url") or get_settings().database_url
 
 
+def include_object(
+    obj: object, name: str | None, type_: str, reflected: bool, compare_to: object
+) -> bool:
+    # Only manage tables we model. PostGIS and its tiger geocoder create their own tables
+    # (spatial_ref_sys, zip_lookup, ...) that autogenerate would otherwise try to drop.
+    return not (type_ == "table" and reflected and compare_to is None)
+
+
 def run_migrations_offline() -> None:
     context.configure(url=database_url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
@@ -25,7 +33,12 @@ def run_migrations_offline() -> None:
 
 
 def _run(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+        include_object=include_object,
+    )
     with context.begin_transaction():
         context.run_migrations()
 

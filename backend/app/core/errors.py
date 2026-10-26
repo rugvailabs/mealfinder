@@ -16,9 +16,12 @@ class AppError(Exception):
     status_code = 400
     code = "bad_request"
 
-    def __init__(self, detail: str = "", *, code: str | None = None) -> None:
+    def __init__(
+        self, detail: str = "", *, code: str | None = None, headers: dict[str, str] | None = None
+    ) -> None:
         super().__init__(detail)
         self.detail = detail
+        self.headers = headers or {}
         if code:
             self.code = code
 
@@ -43,6 +46,20 @@ class ForbiddenError(AppError):
     code = "forbidden"
 
 
+class RateLimitedError(AppError):
+    status_code = 429
+    code = "rate_limited"
+
+    def __init__(self, detail: str, *, retry_after: int) -> None:
+        super().__init__(detail, headers={"Retry-After": str(retry_after)})
+        self.retry_after = retry_after
+
+
+class UpstreamError(AppError):
+    status_code = 502
+    code = "upstream_unavailable"
+
+
 def _problem(status: int, code: str, detail: str, **extra: object) -> JSONResponse:
     body = {
         "type": f"https://mealfinder.dev/problems/{code}",
@@ -57,7 +74,9 @@ def _problem(status: int, code: str, detail: str, **extra: object) -> JSONRespon
 
 async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)
-    return _problem(exc.status_code, exc.code, exc.detail)
+    response = _problem(exc.status_code, exc.code, exc.detail)
+    response.headers.update(exc.headers)
+    return response
 
 
 async def _http_error(_: Request, exc: Exception) -> JSONResponse:
@@ -72,7 +91,9 @@ async def _http_error(_: Request, exc: Exception) -> JSONResponse:
 
 async def _validation_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, RequestValidationError)
-    return _problem(422, "validation_error", "Request validation failed", errors=exc.errors())
+    # Only the JSON-safe parts: `ctx` can hold the raw exception a validator raised.
+    errors = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in exc.errors()]
+    return _problem(422, "validation_error", "Request validation failed", errors=errors)
 
 
 async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
