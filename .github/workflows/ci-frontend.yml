@@ -3,16 +3,42 @@ name: ci-frontend
 on:
   push:
     branches: [main]
+  # No `paths` filter: a required check must report on every PR, or PRs that don't touch the
+  # frontend wait for it forever. The `changes` job decides whether `build` actually runs, and
+  # a job skipped through `if:` counts as passing for branch protection.
   pull_request:
-    paths: ["frontend/**", ".github/workflows/ci-frontend.yml"]
-
-defaults:
-  run:
-    working-directory: frontend
 
 jobs:
-  build:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            frontend=true
+          elif git diff --name-only "$BASE_SHA" HEAD \
+              | grep -qE '^(frontend/|\.github/workflows/ci-frontend\.yml$)'; then
+            frontend=true
+          else
+            frontend=false
+          fi
+          echo "frontend=$frontend" | tee -a "$GITHUB_OUTPUT"
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
