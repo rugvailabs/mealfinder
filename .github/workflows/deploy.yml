@@ -1,0 +1,42 @@
+name: deploy
+
+# Builds and pushes images to GHCR. Rolling them out is left to the hosting target
+# chosen later (see docs/adr); add that step at the end of this job.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service }}
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ inputs.environment }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}

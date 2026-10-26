@@ -1,0 +1,61 @@
+name: mealfinder
+
+x-backend-env: &backend-env
+  MF_ENV: local
+  MF_DATABASE_URL: postgresql+asyncpg://mealfinder:mealfinder@db:5432/mealfinder
+  MF_JWT_SECRET: ${MF_JWT_SECRET:-local-compose-secret-not-for-production}
+  MF_CORS_ORIGINS: '["http://localhost:3000"]'
+
+services:
+  db:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      POSTGRES_USER: mealfinder
+      POSTGRES_PASSWORD: mealfinder
+      POSTGRES_DB: mealfinder
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mealfinder"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    build: ../backend
+    environment: *backend-env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: { condition: service_healthy }
+
+  api:
+    build: ../backend
+    environment: *backend-env
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    build: ../backend
+    environment: *backend-env
+    # Polls the outbox; swap for a real scheduler once there is more than one job.
+    command: ["sh", "-c", "while true; do python -m app.core.jobs outbox.dispatch; sleep 5; done"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  web:
+    build:
+      context: ../frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  pgdata:

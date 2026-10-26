@@ -1,0 +1,49 @@
+name: ci-backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/ci-backend.yml"]
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_USER: mealfinder
+          POSTGRES_PASSWORD: mealfinder
+          POSTGRES_DB: mealfinder
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mealfinder" --health-interval 2s --health-retries 30
+    env:
+      MF_DATABASE_URL: postgresql+asyncpg://mealfinder:mealfinder@localhost:5432/mealfinder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy app
+      - name: Migrations apply, roll back and re-apply cleanly
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Single migration head
+        run: test "$(uv run alembic heads | wc -l)" -eq 1
+      - run: uv run pytest -q
+      - name: OpenAPI snapshot is current
+        run: |
+          uv run python -m scripts.export_openapi
+          git diff --exit-code ../frontend/lib/api/openapi.json
