@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { AccountMenu } from "@/components/account-menu";
+
 type NavItem = { href: string; label: string };
 
 export function PortalShell({
@@ -26,6 +28,7 @@ export function PortalShell({
                 {item.label}
               </Link>
             ))}
+            <AccountMenu />
           </nav>
         </div>
       </header>
