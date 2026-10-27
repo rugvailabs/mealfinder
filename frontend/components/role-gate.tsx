@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -28,10 +29,19 @@ export function RoleGate({ role, children }: { role: Role; children: ReactNode }
     return (
       <section className="space-y-2">
         <h1 className="text-2xl font-semibold">You don&apos;t have access to this page</h1>
-        <p className="opacity-70">
-          This area is for {role} accounts. If you&apos;ve applied, we&apos;ll let you know once
-          you&apos;re approved.
-        </p>
+        {role === "cook" ? (
+          <p className="opacity-70">
+            This area is for cooks.{" "}
+            <Link href="/become-a-cook" className="underline">
+              Apply to cook with us
+            </Link>
+          </p>
+        ) : (
+          <p className="opacity-70">
+            This area is for {role} accounts. If you&apos;ve applied, we&apos;ll let you know once
+            you&apos;re approved.
+          </p>
+        )}
       </section>
     );
   }

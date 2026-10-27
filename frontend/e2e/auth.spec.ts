@@ -1,27 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-// Needs the real API (local/test env, console SMS provider) for the dev OTP lookup.
-const API_URL = process.env.E2E_API_URL;
+import { API_URL, randomPhone, signIn } from "./support";
+
 test.skip(!API_URL, "set E2E_API_URL to run sign-in tests against a running stack");
-
-function randomPhone(): string {
-  return `+9198${Math.floor(10_000_000 + Math.random() * 89_999_999)}`;
-}
-
-async function signIn(page: Page, phone: string): Promise<void> {
-  await page.getByLabel("Mobile number").fill(phone);
-  await page.getByRole("button", { name: "Send code" }).click();
-  await expect(page.getByText(`We sent a code to ${phone}`)).toBeVisible();
-
-  const response = await page.request.get(`${API_URL}/api/v1/auth/_dev/last-otp`, {
-    params: { phone },
-  });
-  expect(response.ok()).toBeTruthy();
-  const { code } = (await response.json()) as { code: string };
-
-  await page.getByLabel("Code").fill(code);
-  await page.getByRole("button", { name: "Verify" }).click();
-}
 
 test("sign in by SMS code, survive a reload, then sign out", async ({ page }) => {
   const phone = randomPhone();

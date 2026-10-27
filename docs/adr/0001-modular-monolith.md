@@ -32,7 +32,7 @@ Next.js (5 role layouts) ──> /api/v1 ──> modules ──> Postgres
 Rules, enforced by `backend/tests/unit/test_module_boundaries.py`:
 
 - A module may import another only if the table above allows it, and only that module's public `service` or `schemas`. Never its `models`, `router` or internals.
-- Rows in another module are referenced **by id only**: no cross-module ORM relationships and no joins across module tables.
+- Rows in another module are referenced **by id only**: no cross-module ORM relationships and no joins across module tables. A database foreign key to another module's table is fine, and may even point against the import direction, because it creates no code dependency. For example, `cook_shop_assignments` (cooks) references `partner_shops` (logistics).
 - Reacting to something that happened in another module is done through outbox events (ADR 0002). This is also how a module reaches "upstream" without breaking the dependency direction (for example, `payments` telling `orders` that a capture succeeded).
 - `app/core` never imports from `app/modules`.
 - Alembic keeps a **single linear head**, and CI fails if there are two.
