@@ -40,12 +40,14 @@ test("a cook applies, is rejected, resubmits and is approved", async ({ browser 
   await address.getByLabel("Latitude").fill("17.385");
   await address.getByLabel("Longitude").fill("78.4867");
   await address.getByRole("button", { name: "Save address" }).click();
-  await expect(cook.getByRole("status")).toHaveText("Address saved");
+  await expect(address.getByRole("status")).toHaveText("Address saved");
 
   // Editing the profile keeps the status.
   await cook.getByLabel("About your cooking").fill("Andhra and Telangana home meals");
   await cook.getByRole("button", { name: "Save profile" }).click();
-  await expect(cook.getByRole("status")).toHaveText("Profile saved");
+  await expect(cook.getByRole("form", { name: "Profile" }).getByRole("status")).toHaveText(
+    "Profile saved",
+  );
   await cook.reload();
   await expect(cook.getByTestId("approval-status")).toHaveText("pending");
   await expect(cook.getByLabel("Address line 1")).toHaveValue("12 Temple Street");
@@ -109,6 +111,7 @@ test("a pending cook can't be approved before adding an address", async ({ brows
   await grantRole(admin, adminPhone, "admin");
   await admin.goto("/login?next=%2Fadmin%2Fcooks");
   await signIn(admin, adminPhone);
+  await expect(admin).toHaveURL("/admin/cooks");
   const row = await adminRow(admin, "Pending", kitchen);
   await expect(row.getByText("no address yet")).toBeVisible();
   await expect(row.getByRole("button", { name: "Approve" })).toBeDisabled();
