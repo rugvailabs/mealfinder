@@ -13,6 +13,7 @@ dependencies = [
     "alembic>=1.14",
     "pyjwt>=2.10",
     "httpx>=0.28",
+    "geoalchemy2>=0.15",
 ]
 
 [dependency-groups]

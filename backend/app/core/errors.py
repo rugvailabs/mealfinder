@@ -55,6 +55,13 @@ class RateLimitedError(AppError):
         self.retry_after = retry_after
 
 
+class NotImplementedYetError(AppError):
+    """An endpoint whose contract exists before its behaviour does."""
+
+    status_code = 501
+    code = "not_implemented"
+
+
 class UpstreamError(AppError):
     status_code = 502
     code = "upstream_unavailable"

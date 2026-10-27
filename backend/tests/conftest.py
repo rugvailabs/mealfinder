@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 os.environ.setdefault("MF_ENV", "test")
 os.environ.setdefault("MF_LOG_JSON", "false")
 
+import app.core.audit
 import app.core.outbox
 import app.modules
 from app.core.db import Base, get_session

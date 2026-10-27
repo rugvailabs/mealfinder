@@ -1,14 +1,22 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response, status
+from pydantic import BaseModel
 
-from app.core.auth import CurrentPrincipal
+from app.core.auth import CurrentPrincipal, Role
 from app.core.db import SessionDep
 from app.core.errors import NotFoundError
 from app.core.settings import get_settings
 from app.core.sms import ConsoleSmsSender, SmsSender, get_sms_sender
 from app.modules.identity import service
-from app.modules.identity.schemas import OtpRequest, OtpRequested, OtpVerify, TokenOut, UserOut
+from app.modules.identity.schemas import (
+    OtpRequest,
+    OtpRequested,
+    OtpVerify,
+    Phone,
+    TokenOut,
+    UserOut,
+)
 
 router = APIRouter(prefix="/auth", tags=["identity"])
 
@@ -104,3 +112,15 @@ async def last_otp(phone: str, sms: SmsDep) -> dict[str, str]:
     if code is None:
         raise NotFoundError("No code sent to that number")
     return {"code": code}
+
+
+class DevGrantRole(BaseModel):
+    phone: Phone
+    role: Role
+
+
+@dev_router.post("/grant-role", status_code=status.HTTP_204_NO_CONTENT)
+async def dev_grant_role(body: DevGrantRole, db: SessionDep) -> None:
+    """Give an existing account a role, so e2e tests can act as an admin."""
+    user = await service.get_or_create_user(db, body.phone)
+    await service.grant_role(db, user.id, body.role)

@@ -1,6 +1,287 @@
 {
   "components": {
     "schemas": {
+      "ApprovalStatus": {
+        "enum": [
+          "pending",
+          "approved",
+          "suspended",
+          "rejected"
+        ],
+        "title": "ApprovalStatus",
+        "type": "string"
+      },
+      "CookAdminOut": {
+        "description": "What an admin sees when reviewing cooks. No address: that is a separate, audited read.",
+        "properties": {
+          "approval_status": {
+            "$ref": "#/components/schemas/ApprovalStatus"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "has_address": {
+            "title": "Has Address",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "rejected_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejected At"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "suspended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspended At"
+          },
+          "suspension_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspension Reason"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "phone",
+          "display_name",
+          "bio",
+          "approval_status",
+          "submitted_at",
+          "approved_by",
+          "approved_at",
+          "rejection_reason",
+          "rejected_at",
+          "suspension_reason",
+          "suspended_at",
+          "has_address"
+        ],
+        "title": "CookAdminOut",
+        "type": "object"
+      },
+      "CookProfileCreate": {
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "display_name": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Display Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name"
+        ],
+        "title": "CookProfileCreate",
+        "type": "object"
+      },
+      "CookProfileOut": {
+        "description": "The cook's own view of their profile.",
+        "properties": {
+          "approval_status": {
+            "$ref": "#/components/schemas/ApprovalStatus"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "suspension_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspension Reason"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "bio",
+          "approval_status",
+          "submitted_at",
+          "approved_at",
+          "rejection_reason",
+          "suspension_reason"
+        ],
+        "title": "CookProfileOut",
+        "type": "object"
+      },
+      "CookProfileUpdate": {
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          }
+        },
+        "title": "CookProfileUpdate",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -12,6 +293,126 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HomeAddressIn": {
+        "properties": {
+          "city": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City",
+            "type": "string"
+          },
+          "lat": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "type": "number"
+          },
+          "line1": {
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Line1",
+            "type": "string"
+          },
+          "line2": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line2"
+          },
+          "lng": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lng",
+            "type": "number"
+          },
+          "pincode": {
+            "pattern": "^[1-9]\\d{5}$",
+            "title": "Pincode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line1",
+          "city",
+          "pincode",
+          "lat",
+          "lng"
+        ],
+        "title": "HomeAddressIn",
+        "type": "object"
+      },
+      "HomeAddressOut": {
+        "properties": {
+          "city": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City",
+            "type": "string"
+          },
+          "cook_id": {
+            "format": "uuid",
+            "title": "Cook Id",
+            "type": "string"
+          },
+          "lat": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "type": "number"
+          },
+          "line1": {
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Line1",
+            "type": "string"
+          },
+          "line2": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line2"
+          },
+          "lng": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lng",
+            "type": "number"
+          },
+          "pincode": {
+            "pattern": "^[1-9]\\d{5}$",
+            "title": "Pincode",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line1",
+          "city",
+          "pincode",
+          "lat",
+          "lng",
+          "cook_id",
+          "updated_at"
+        ],
+        "title": "HomeAddressOut",
         "type": "object"
       },
       "OtpRequest": {
@@ -62,6 +463,21 @@
           "code"
         ],
         "title": "OtpVerify",
+        "type": "object"
+      },
+      "ReasonIn": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ReasonIn",
         "type": "object"
       },
       "Role": {
@@ -196,6 +612,230 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/cooks": {
+      "get": {
+        "description": "Cooks, oldest submission first, optionally filtered by approval status.",
+        "operationId": "admin_list_cooks",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApprovalStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CookAdminOut"
+                  },
+                  "title": "Response Admin List Cooks",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Cooks",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/cooks/{cook_id}/approve": {
+      "post": {
+        "description": "Approve a pending cook, or reinstate a suspended one. The cook needs an address.",
+        "operationId": "admin_approve_cook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cook_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cook Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookAdminOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Cook",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/cooks/{cook_id}/reject": {
+      "post": {
+        "operationId": "admin_reject_cook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cook_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cook Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookAdminOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Cook",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/cooks/{cook_id}/suspend": {
+      "post": {
+        "operationId": "admin_suspend_cook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cook_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Cook Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookAdminOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suspend Cook",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "operationId": "identity_logout",
@@ -359,6 +999,238 @@
         "summary": "Refresh",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/api/v1/catalog/listings": {
+      "post": {
+        "description": "Stub until listings land (Phase 2). The approved-cook check already runs, so the\nauthorization contract is in force: unapproved cooks get 403, approved ones 501.",
+        "operationId": "catalog_create_listing",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Listing",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v1/cooks/me": {
+      "get": {
+        "operationId": "cooks_get_my_profile",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get My Profile",
+        "tags": [
+          "cooks"
+        ]
+      },
+      "patch": {
+        "description": "Edit the profile. Never changes the approval status.",
+        "operationId": "cooks_update_my_profile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CookProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update My Profile",
+        "tags": [
+          "cooks"
+        ]
+      },
+      "post": {
+        "description": "Apply to cook. Any signed-in account can apply; it gets the cook role at once and\nwaits as `pending` until an admin approves it.",
+        "operationId": "cooks_apply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CookProfileCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Apply",
+        "tags": [
+          "cooks"
+        ]
+      }
+    },
+    "/api/v1/cooks/me/address": {
+      "get": {
+        "description": "Your home address. Every read is audit-logged.",
+        "operationId": "cooks_get_my_address",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeAddressOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get My Address",
+        "tags": [
+          "cooks"
+        ]
+      },
+      "put": {
+        "operationId": "cooks_save_my_address",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HomeAddressIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save My Address",
+        "tags": [
+          "cooks"
+        ]
+      }
+    },
+    "/api/v1/cooks/me/resubmit": {
+      "post": {
+        "description": "Ask for another review after a rejection. Allowed only while rejected.",
+        "operationId": "cooks_resubmit",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resubmit",
+        "tags": [
+          "cooks"
         ]
       }
     },
