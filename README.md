@@ -21,6 +21,8 @@ docker compose -f infra/docker-compose.yml up --build
 
 For running each side on its own, see [docs/runbooks/local-development.md](docs/runbooks/local-development.md).
 
+Phase plan and status: [docs/ROADMAP.md](docs/ROADMAP.md).
+
 ## Architecture
 
 - [ADR 0001: Modular monolith](docs/adr/0001-modular-monolith.md)
