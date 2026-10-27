@@ -252,6 +252,13 @@ async def get_user(db: AsyncSession, user_id: uuid.UUID) -> UserOut:
     return UserOut(id=user.id, phone=user.phone, name=user.name, roles=await roles_for(db, user.id))
 
 
+async def phones_for(db: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    if not user_ids:
+        return {}
+    rows = await db.execute(select(User.id, User.phone).where(User.id.in_(user_ids)))
+    return {user_id: phone for user_id, phone in rows.all()}
+
+
 async def get_or_create_user(db: AsyncSession, phone: str) -> UserOut:
     user = await db.scalar(select(User).where(User.phone == phone))
     if user is None:

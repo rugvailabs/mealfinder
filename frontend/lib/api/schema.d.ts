@@ -4,6 +4,80 @@
  */
 
 export interface paths {
+    "/api/v1/admin/cooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Cooks
+         * @description Cooks, oldest submission first, optionally filtered by approval status.
+         */
+        get: operations["admin_list_cooks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/cooks/{cook_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve Cook
+         * @description Approve a pending cook, or reinstate a suspended one. The cook needs an address.
+         */
+        post: operations["admin_approve_cook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/cooks/{cook_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject Cook */
+        post: operations["admin_reject_cook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/cooks/{cook_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspend Cook */
+        post: operations["admin_suspend_cook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout": {
         parameters: {
             query?: never;
@@ -120,6 +194,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/catalog/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Listing
+         * @description Stub until listings land (Phase 2). The approved-cook check already runs, so the
+         *     authorization contract is in force: unapproved cooks get 403, approved ones 501.
+         */
+        post: operations["catalog_create_listing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cooks/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get My Profile */
+        get: operations["cooks_get_my_profile"];
+        put?: never;
+        /**
+         * Apply
+         * @description Apply to cook. Any signed-in account can apply; it gets the cook role at once and
+         *     waits as `pending` until an admin approves it.
+         */
+        post: operations["cooks_apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update My Profile
+         * @description Edit the profile. Never changes the approval status.
+         */
+        patch: operations["cooks_update_my_profile"];
+        trace?: never;
+    };
+    "/api/v1/cooks/me/address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Address
+         * @description Your home address. Every read is audit-logged.
+         */
+        get: operations["cooks_get_my_address"];
+        /** Save My Address */
+        put: operations["cooks_save_my_address"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cooks/me/resubmit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resubmit
+         * @description Ask for another review after a rejection. Allowed only while rejected.
+         */
+        post: operations["cooks_resubmit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -141,10 +303,138 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ApprovalStatus
+         * @enum {string}
+         */
+        ApprovalStatus: "pending" | "approved" | "suspended" | "rejected";
+        /**
+         * CookAdminOut
+         * @description What an admin sees when reviewing cooks. No address: that is a separate, audited read.
+         */
+        CookAdminOut: {
+            approval_status: components["schemas"]["ApprovalStatus"];
+            /** Approved At */
+            approved_at: string | null;
+            /** Approved By */
+            approved_by: string | null;
+            /** Bio */
+            bio: string | null;
+            /** Display Name */
+            display_name: string;
+            /** Has Address */
+            has_address: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Phone */
+            phone: string;
+            /** Rejected At */
+            rejected_at: string | null;
+            /** Rejection Reason */
+            rejection_reason: string | null;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Suspended At */
+            suspended_at: string | null;
+            /** Suspension Reason */
+            suspension_reason: string | null;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
+        /** CookProfileCreate */
+        CookProfileCreate: {
+            /** Bio */
+            bio?: string | null;
+            /** Display Name */
+            display_name: string;
+        };
+        /**
+         * CookProfileOut
+         * @description The cook's own view of their profile.
+         */
+        CookProfileOut: {
+            approval_status: components["schemas"]["ApprovalStatus"];
+            /** Approved At */
+            approved_at: string | null;
+            /** Bio */
+            bio: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Rejection Reason */
+            rejection_reason: string | null;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Suspension Reason */
+            suspension_reason: string | null;
+        };
+        /** CookProfileUpdate */
+        CookProfileUpdate: {
+            /** Bio */
+            bio?: string | null;
+            /** Display Name */
+            display_name?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HomeAddressIn */
+        HomeAddressIn: {
+            /** City */
+            city: string;
+            /** Lat */
+            lat: number;
+            /** Line1 */
+            line1: string;
+            /** Line2 */
+            line2?: string | null;
+            /** Lng */
+            lng: number;
+            /** Pincode */
+            pincode: string;
+        };
+        /** HomeAddressOut */
+        HomeAddressOut: {
+            /** City */
+            city: string;
+            /**
+             * Cook Id
+             * Format: uuid
+             */
+            cook_id: string;
+            /** Lat */
+            lat: number;
+            /** Line1 */
+            line1: string;
+            /** Line2 */
+            line2?: string | null;
+            /** Lng */
+            lng: number;
+            /** Pincode */
+            pincode: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** OtpRequest */
         OtpRequest: {
@@ -164,6 +454,11 @@ export interface components {
             code: string;
             /** Phone */
             phone: string;
+        };
+        /** ReasonIn */
+        ReasonIn: {
+            /** Reason */
+            reason: string;
         };
         /**
          * Role
@@ -220,6 +515,138 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_list_cooks: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ApprovalStatus"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookAdminOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_approve_cook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cook_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_reject_cook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cook_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_suspend_cook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cook_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     identity_logout: {
         parameters: {
             query?: never;
@@ -358,6 +785,183 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+        };
+    };
+    catalog_create_listing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    cooks_get_my_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookProfileOut"];
+                };
+            };
+        };
+    };
+    cooks_apply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CookProfileCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cooks_update_my_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CookProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cooks_get_my_address: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomeAddressOut"];
+                };
+            };
+        };
+    };
+    cooks_save_my_address: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HomeAddressIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cooks_resubmit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookProfileOut"];
                 };
             };
         };

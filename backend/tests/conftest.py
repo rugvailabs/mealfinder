@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -15,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 os.environ.setdefault("MF_ENV", "test")
 os.environ.setdefault("MF_LOG_JSON", "false")
 
+import app.core.audit
 import app.core.outbox
 import app.modules
 from app.core.db import Base, get_session
@@ -33,6 +35,9 @@ async def engine(tmp_path: Path) -> AsyncIterator[AsyncEngine]:
     url = os.environ.get("MF_TEST_DATABASE_URL") or f"sqlite+aiosqlite:///{tmp_path / 'test.db'}"
     engine = create_async_engine(url)
     async with engine.begin() as conn:
+        if conn.dialect.name == "postgresql":
+            # create_all skips migrations, so enable PostGIS here as migration 0002 does.
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     yield engine

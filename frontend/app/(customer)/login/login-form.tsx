@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { api, problemDetail } from "@/lib/api/client";
 import { safeNextPath, type User } from "@/lib/auth/session";
+import { buttonClass, inputClass } from "@/lib/ui/styles";
 
 const HOME_BY_ROLE: [User["roles"][number], string][] = [
   ["admin", "/admin"],
@@ -17,11 +18,6 @@ const HOME_BY_ROLE: [User["roles"][number], string][] = [
 function homeFor(user: User): string {
   return HOME_BY_ROLE.find(([role]) => user.roles.includes(role))?.[1] ?? "/";
 }
-
-const inputClass =
-  "w-full rounded border border-black/20 bg-transparent px-3 py-2 dark:border-white/25";
-const buttonClass =
-  "rounded bg-foreground px-4 py-2 font-medium text-background disabled:opacity-50";
 
 export function LoginForm() {
   const auth = useAuth();
